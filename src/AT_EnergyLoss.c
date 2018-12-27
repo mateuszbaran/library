@@ -77,7 +77,8 @@ void AT_kappa_multi(const long n,
 void AT_Landau_PDF( const long n, 
         const double lambda_landau[], 
         double density[] ) {
-    for (int i = 0; i < n; i++) {
+  long i;
+    for (i = 0; i < n; i++) {
 //        density[i] = CL_denlan(lambda_landau[i]);
     }
 }
@@ -85,7 +86,8 @@ void AT_Landau_PDF( const long n,
 void AT_Landau_IDF( const long n, 
         const double rnd[], 
         double lambda_landau[] ) {
-    for (int i = 0; i < n; i++) {
+  long i;
+    for (i = 0; i < n; i++) {
 //        lambda_landau[i] = CL_ranlan(rnd[i]);
     }
 }
@@ -154,7 +156,8 @@ void AT_lambda_landau_from_energy_loss_multi(const long n,
         const double slab_thickness_um,
         double lambda_landau[]) {
 
-    for (long i = 0; i < n; i++) {
+    long i;
+    for (i = 0; i < n; i++) {
         lambda_landau[i] = AT_lambda_landau_from_energy_loss_single(energy_loss_keV[i], E_MeV_u, particle_no, material_no, slab_thickness_um);
     }
 
@@ -186,8 +189,8 @@ void AT_energy_loss_from_lambda_landau_multi(const long n,
         const double slab_thickness_um[],
         double energy_loss_keV[]) {
 
-
-    for (long i = 0; i < n; i++) {
+  long i;
+    for (i = 0; i < n; i++) {
         energy_loss_keV[i] = AT_energy_loss_from_lambda_landau_single(lambda_landau[i],
                 E_MeV_u[i],
                 particle_no[i],
@@ -223,8 +226,8 @@ void AT_energy_loss_from_lambda_vavilov_multi(const long n,
         const double slab_thickness_um[],
         double energy_loss_keV[]) {
 
-
-    for (long i = 0; i < n; i++) {
+  long i;
+    for (i = 0; i < n; i++) {
         energy_loss_keV[i] = AT_energy_loss_from_lambda_vavilov_single(lambda_vavilov[i],
                 E_MeV_u[i],
                 particle_no[i],
@@ -309,7 +312,8 @@ void AT_lambda_vavilov_from_energy_loss_multi(const long n,
         const double slab_thickness_um,
         double lambda_vavilov[]) {
 
-    for (long i = 0; i < n; i++) {
+    long i;
+    for (i = 0; i < n; i++) {
         lambda_vavilov[i] = AT_lambda_vavilov_from_energy_loss_single(energy_loss_keV[i],
                 E_MeV_u,
                 particle_no,
@@ -576,13 +580,15 @@ double AT_lambda_Landau_Mean(const double kappa, const double beta) {
 //////////////////////////////
 
 void AT_Gauss_PDF(const long n, const double lambda_gauss[], double density[]) {
-    for (int i = 0; i < n; i++) {
+  long i;
+    for (i = 0; i < n; i++) {
         density[i] = gsl_ran_ugaussian_pdf(lambda_gauss[i]);
     }
 }
 
 void AT_Gauss_IDF(const long n, const double rnd[], double lambda_gauss[]) {
-    for (int i = 0; i < n; i++) {
+  long i;
+    for (i = 0; i < n; i++) {
         lambda_gauss[i] = gsl_cdf_ugaussian_Pinv(rnd[i]);
     }
 }
@@ -613,7 +619,8 @@ void AT_energy_loss_from_lambda_gauss_multi(const long n,
         double energy_loss_keV[]) {
 
 
-    for (long i = 0; i < n; i++) {
+    long i;
+    for (i = 0; i < n; i++) {
         energy_loss_keV[i] = AT_energy_loss_from_lambda_gauss_single(lambda_gauss[i],
                 E_MeV_u[i],
                 particle_no[i],

@@ -273,8 +273,8 @@ void AT_Vavilov_PDF(const long n, const double lambda_vavilov[], const double ka
         double density[]) {
     double beta2 = beta * beta;
 //    CL_vavset(kappa, beta2);
-
-    for (int i = 0; i < n; i++) {
+    long i;
+    for (i = 0; i < n; i++) {
 //        density[i] = CL_vavden(lambda_vavilov[i]);
     }
 }
@@ -282,7 +282,8 @@ void AT_Vavilov_PDF(const long n, const double lambda_vavilov[], const double ka
 void AT_Vavilov_IDF(const long n, const double rnd[], const double kappa[], const double beta[],
         double lambda_vavilov[]) {
 
-    for (int i = 0; i < n; i++) {
+        long i;
+    for (i = 0; i < n; i++) {
 //        lambda_vavilov[i] = CL_vavran(kappa[i], beta[i]*beta[i], rnd[i]);
     }
 }

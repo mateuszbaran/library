@@ -45,7 +45,7 @@
 
 
 #include "AT_StoppingPower.h"
-#include "AT_CernlibFuns.h"
+//#include "AT_CernlibFuns.h"
 #include "AT_DataRange.h"
 
 int main(){
@@ -96,10 +96,10 @@ int main(){
 			test);
 	printf("Ergebnis ICRU: %e, %e, %e\n", test[0], test[1], test[2]);
 
-	double l = 0.0, kappa = 1.0, beta = 0.5;
-	CL_vavset(kappa, beta*beta);
-
-	printf("Ergebnis Landau / Vavilov: %e, %e\n", CL_denlan(l), CL_vavden(l));
+//	double l = 0.0, kappa = 1.0, beta = 0.5;
+//	CL_vavset(kappa, beta*beta);
+//
+//	printf("Ergebnis Landau / Vavilov: %e, %e\n", CL_denlan(l), CL_vavden(l));
 
 
 

@@ -78,7 +78,7 @@ void AT_Landau_PDF( const long n,
         const double lambda_landau[], 
         double density[] ) {
     for (int i = 0; i < n; i++) {
-        density[i] = CL_denlan(lambda_landau[i]);
+//        density[i] = CL_denlan(lambda_landau[i]);
     }
 }
 
@@ -86,7 +86,7 @@ void AT_Landau_IDF( const long n,
         const double rnd[], 
         double lambda_landau[] ) {
     for (int i = 0; i < n; i++) {
-        lambda_landau[i] = CL_ranlan(rnd[i]);
+//        lambda_landau[i] = CL_ranlan(rnd[i]);
     }
 }
 
@@ -269,10 +269,10 @@ void AT_Landau_energy_loss_distribution(const long n,
 void AT_Vavilov_PDF(const long n, const double lambda_vavilov[], const double kappa, const double beta,
         double density[]) {
     double beta2 = beta * beta;
-    CL_vavset(kappa, beta2);
+//    CL_vavset(kappa, beta2);
 
     for (int i = 0; i < n; i++) {
-        density[i] = CL_vavden(lambda_vavilov[i]);
+//        density[i] = CL_vavden(lambda_vavilov[i]);
     }
 }
 
@@ -280,7 +280,7 @@ void AT_Vavilov_IDF(const long n, const double rnd[], const double kappa[], cons
         double lambda_vavilov[]) {
 
     for (int i = 0; i < n; i++) {
-        lambda_vavilov[i] = CL_vavran(kappa[i], beta[i]*beta[i], rnd[i]);
+//        lambda_vavilov[i] = CL_vavran(kappa[i], beta[i]*beta[i], rnd[i]);
     }
 }
 
@@ -390,80 +390,80 @@ void AT_energy_loss_distribution(const long n,
  */
 double AT_lambda_Vavilov_Mode(const double kappa, const double beta) {
 
-    CL_vavset(kappa, beta);
+//    CL_vavset(kappa, beta);
     double x = -4.22784335098467134e-01 - log(kappa) - beta*beta;
-    if (x>-0.223172) x = -0.223172;
-    double eps = 0.01;
-    double dx;
-
-    do {
-        double p0 = CL_vavden(x - eps);
-        double p1 = CL_vavden(x);
-        double p2 = CL_vavden(x + eps);
-        double y1 = 0.5 * (p2 - p0) / eps;
-        double y2 = (p2 - 2 * p1 + p0) / (eps * eps);
-        if (y2 != 0) {
-            dx = -y1 / y2;
-        } else {
-            dx = 0.0;
-        }
-        x += dx;
-        if (fabs(dx) < eps) eps = 0.1 * fabs(dx);
-    } while (fabs(dx) > 1E-5);
+//    if (x>-0.223172) x = -0.223172;
+//    double eps = 0.01;
+//    double dx;
+//
+//    do {
+//        double p0 = CL_vavden(x - eps);
+//        double p1 = CL_vavden(x);
+//        double p2 = CL_vavden(x + eps);
+//        double y1 = 0.5 * (p2 - p0) / eps;
+//        double y2 = (p2 - 2 * p1 + p0) / (eps * eps);
+//        if (y2 != 0) {
+//            dx = -y1 / y2;
+//        } else {
+//            dx = 0.0;
+//        }
+//        x += dx;
+//        if (fabs(dx) < eps) eps = 0.1 * fabs(dx);
+//    } while (fabs(dx) > 1E-5);
     return x;
 }
 
 double AT_lambda_Vavilov_FWHM_left(const double kappa, const double beta) {
 
     double x = AT_lambda_Vavilov_Mode(kappa, beta);
-    CL_vavset(kappa, beta);
-    double p = CL_vavden(x) * 0.5;
+//    CL_vavset(kappa, beta);
+//    double p = CL_vavden(x) * 0.5;
 
     x -= 1.3637;
-    double eps = 0.01;
-    double dx;
-
-    do {
-        double p0 = CL_vavden(x);
-        double p1 = CL_vavden(x - eps);
-        double p2 = CL_vavden(x + eps);
-        double y1 = p0 - p;
-        double y2 = 0.5 * (p2 - p1) / eps;
-        if (y2 != 0) {
-            dx = -y1 / y2;
-        } else {
-            dx = 0.0;
-        }
-        x += dx;
-        if (fabs(dx) < eps) eps = 0.1 * fabs(dx);
-    } while (fabs(dx) > 1E-5);
+//    double eps = 0.01;
+//    double dx;
+//
+//    do {
+//        double p0 = CL_vavden(x);
+//        double p1 = CL_vavden(x - eps);
+//        double p2 = CL_vavden(x + eps);
+//        double y1 = p0 - p;
+//        double y2 = 0.5 * (p2 - p1) / eps;
+//        if (y2 != 0) {
+//            dx = -y1 / y2;
+//        } else {
+//            dx = 0.0;
+//        }
+//        x += dx;
+//        if (fabs(dx) < eps) eps = 0.1 * fabs(dx);
+//    } while (fabs(dx) > 1E-5);
     return x;
 }
 
 double AT_lambda_Vavilov_FWHM_right(const double kappa, const double beta) {
 
     double x = AT_lambda_Vavilov_Mode(kappa, beta);
-    CL_vavset(kappa, beta);
-    double p = CL_vavden(x) * 0.5;
-
-    x += 2.655;
-    double eps = 0.01;
-    double dx;
-
-    do {
-        double p0 = CL_vavden(x);
-        double p1 = CL_vavden(x - eps);
-        double p2 = CL_vavden(x + eps);
-        double y1 = p0 - p;
-        double y2 = 0.5 * (p2 - p1) / eps;
-        if (y2 != 0) {
-            dx = -y1 / y2;
-        } else {
-            dx = 0.0;
-        }
-        x += dx;
-        if (fabs(dx) < eps) eps = 0.1 * fabs(dx);
-    } while (fabs(dx) > 1E-5);
+//    CL_vavset(kappa, beta);
+//    double p = CL_vavden(x) * 0.5;
+//
+//    x += 2.655;
+//    double eps = 0.01;
+//    double dx;
+//
+//    do {
+//        double p0 = CL_vavden(x);
+//        double p1 = CL_vavden(x - eps);
+//        double p2 = CL_vavden(x + eps);
+//        double y1 = p0 - p;
+//        double y2 = 0.5 * (p2 - p1) / eps;
+//        if (y2 != 0) {
+//            dx = -y1 / y2;
+//        } else {
+//            dx = 0.0;
+//        }
+//        x += dx;
+//        if (fabs(dx) < eps) eps = 0.1 * fabs(dx);
+//    } while (fabs(dx) > 1E-5);
     return x;
 }
 

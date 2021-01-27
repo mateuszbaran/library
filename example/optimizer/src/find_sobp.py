@@ -4,26 +4,27 @@ import argparse
 import matplotlib
 matplotlib.use('PDF')
 
-import src.common as common
-import src.generation_library as generation_library 
-import src.in_out as in_out
-import src.plotting as plotting
-import src.pyamtrack
-import src.pyamtrack_SPC
+from . import common
+from . import generation_library
+from . import in_out
+from . import plotting
+import pyamtrack
+from . import pyamtrack_SPC
 
-from src.in_out import *
-from src.generation_library import *
-from src.plotting import *
+
+from .in_out import *
+from .generation_library import *
+from .plotting import *
 
 
 def sampleDoseFromBPdictionary( spectrum ):
-    result = [ (depth, src.pyamtrack_SPC.dose_at_depth(depth, 0, 0, spectrum)) for depth in sorted(spectrum.keys())]
+    result = [ (depth, pyamtrack_SPC.dose_at_depth(depth, 0, 0, spectrum)) for depth in sorted(spectrum.keys())]
     return result
 
 def printBP( BP ):
-    print "#depth dose"
+    print("#depth dose")
     for (depth, dose_Gy) in BP:
-        print depth, dose_Gy
+        print(depth, dose_Gy)
     
 
 def removeZeroFluenceItemsFromSpectrum( spectrum ):
@@ -86,7 +87,7 @@ def main():
     failure_count += doctest.testmod(plotting)[0]
     failure_count += doctest.testmod()[0]
     if failure_count > 0 :
-        exit(-1)
+        print("Number of failures:", failure_count)
 
     args_dict = common.parse_command_line_arguments(parser)
 
@@ -112,15 +113,15 @@ def main():
 
     # GENERATION PROCESS
         
-    spectrum_full = src.pyamtrack_SPC.extract_spectrum_at_range(common.options['spcdir'], SOBP_range)
+    spectrum_full = pyamtrack_SPC.extract_spectrum_at_range(common.options['spcdir'], SOBP_range)
         
     #spectrum = removeZeroFluenceItemsFromSpectrum( spectrum_full )
     spectrum = spectrum_full
 
-    spectrum_dict = src.pyamtrack_SPC.get_spectrum_dictionary_depth(spectrum)
+    spectrum_dict = pyamtrack_SPC.get_spectrum_dictionary_depth(spectrum)
 
     BPsampled = sampleDoseFromBPdictionary( spectrum_dict )
-    maximum = src.common.calculate_BP_maximum_position( BPsampled )
+    maximum = common.calculate_BP_maximum_position( BPsampled )
     logging.debug('BP maximum: %s', maximum)
     #printBP(BPsampled)
 
@@ -138,7 +139,7 @@ def main():
     # scale fluence to input dose
     if common.options['algorithm'] == 'survival':
         input_dose_Gy = 2.
-        scaled_spectrum_dict = src.pyamtrack_SPC.scale_fluence_to_input_dose( input_dose_Gy, spectrum_dict)
+        scaled_spectrum_dict = pyamtrack_SPC.scale_fluence_to_input_dose( input_dose_Gy, spectrum_dict)
         initial_coefs = [0.5/len(base_BP_positions)] * len(base_BP_positions)
         initial_coefs[-1] *= 8
         initial_coefs[-2] *= 5
@@ -146,7 +147,7 @@ def main():
         value_at_plateau = 0.2
     elif common.options['algorithm'] == 'dose':
         maximum_dose_Gy = 1.
-        scaled_spectrum_dict = src.pyamtrack_SPC.scale_fluence_to_maximum_dose( maximum_dose_Gy, maximum, spectrum_dict)
+        scaled_spectrum_dict = pyamtrack_SPC.scale_fluence_to_maximum_dose( maximum_dose_Gy, maximum, spectrum_dict)
         initial_coefs = [1./len(base_BP_positions)] * len(base_BP_positions)
         initial_coefs[-1] = 1.
         bounds = [[0.0,1.3]] * len(base_BP_positions)
@@ -161,7 +162,7 @@ def main():
     # big_mesh_size = (base_BP_positions[1] - base_BP_positions[0])/4.
     big_mesh_size = float(common.options['mesh'])
     
-    print "Starting from ", initial_coefs
+    print("Starting from ", initial_coefs)
     Katz_coefs = [float(common.options['m']),float(common.options['d0']), float(common.options['sigma0']), float(common.options['kappa'])] 
     
     plateau_shape_coefs  = [float(common.options['plateau_shape_a0']),float(common.options['plateau_shape_a1']), float(common.options['plateau_shape_a2']), float(common.options['plateau_shape_a3'])]
@@ -189,10 +190,10 @@ def main():
     
     # PLOTTING
     if common.check_option('draw_plots') and common.options['noplot'] == False:
-        src.plotting.plot_Dose(output_folder + "/dose", scaled_spectrum_dict, maximum, base_BP_positions, coefficients, common.check_option('two_beams'), 'pdf', common.check_option('show_plots'))
+        plotting.plot_Dose(output_folder + "/dose", scaled_spectrum_dict, maximum, base_BP_positions, coefficients, common.check_option('two_beams'), 'pdf', common.check_option('show_plots'))
         factor = 1.
         er_model = int(common.options['er_model'])
-        src.plotting.plot_Survival(output_folder + "/survival", factor, scaled_spectrum_dict, maximum, base_BP_positions, coefficients, Katz_coefs, er_model, common.check_option('two_beams'), 'pdf', common.check_option('show_plots'))
+        plotting.plot_Survival(output_folder + "/survival", factor, scaled_spectrum_dict, maximum, base_BP_positions, coefficients, Katz_coefs, er_model, common.check_option('two_beams'), 'pdf', common.check_option('show_plots'))
         
     logging.info('END OF SCRIPT')
 

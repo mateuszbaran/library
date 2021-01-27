@@ -1,14 +1,14 @@
-import src.pyamtrack
+from pyamtrack import libAT
 import os
 import bisect
 
 def extract_spectrum_at_range( spcdirpath, range_cmg):
     
-    number_of_bins = src.pyamtrack.AT_SPC_number_of_bins_at_range(spcdirpath, range_cmg)
-    print "Number of bins " + str(number_of_bins)
+    number_of_bins = libAT.AT_SPC_number_of_bins_at_range(spcdirpath, range_cmg)
+    print("Number of bins " + str(number_of_bins))
                 
     if number_of_bins <= 0:
-        print "Could not get number of bins "
+        print("Could not get number of bins ")
         return None
     
     depth_step = [0] * number_of_bins
@@ -18,13 +18,13 @@ def extract_spectrum_at_range( spcdirpath, range_cmg):
     particle_no =  [0] * number_of_bins
     fluence_cm2 = [0] * number_of_bins
 
-    result = src.pyamtrack.AT_SPC_spectrum_at_range(spcdirpath, range_cmg, number_of_bins, depth_step, depth_g_cm2, E_MeV_u, DE_MeV_u, particle_no, fluence_cm2)
+    result = libAT.AT_SPC_spectrum_at_range(spcdirpath, range_cmg, number_of_bins, depth_step, depth_g_cm2, E_MeV_u, DE_MeV_u, particle_no, fluence_cm2)
     
     if result[0] != 0:
-        print "Could not get read data"
+        print("Could not get read data")
         return None
     
-    print result
+    print(result)
     
     depth_step, depth_g_cm2, E_MeV_u, DE_MeV_u, particle_no, fluence_cm2 = result[1:]    
     
@@ -39,7 +39,7 @@ def extract_range(filename):
     normalisation = 1.
     steps_no = 1
     
-    result = src.pyamtrack.AT_SPC_read_header_from_filename_fast(filename, E_MeV_u, peak_position_g_cm2, particle_no, material_no, normalisation, steps_no)
+    result = libAT.AT_SPC_read_header_from_filename_fast(filename, E_MeV_u, peak_position_g_cm2, particle_no, material_no, normalisation, steps_no)
     
     return result[2]
 
@@ -54,7 +54,7 @@ def scale_fluence_to_input_dose( input_dose_Gy, spectrum_dict):
         
     E_MeV_u_input, particle_no_input, fluence_cm2_input = spectrum_input_channel
     
-    old_input_dose_Gy = src.pyamtrack.AT_total_D_Gy(len(E_MeV_u_input), E_MeV_u_input, particle_no_input, fluence_cm2_input, material_no, stopping_power_source_no)
+    old_input_dose_Gy = libAT.AT_total_D_Gy(len(E_MeV_u_input), E_MeV_u_input, particle_no_input, fluence_cm2_input, material_no, stopping_power_source_no)
     
     factor = input_dose_Gy / old_input_dose_Gy
     
@@ -77,7 +77,7 @@ def scale_fluence_to_maximum_dose( maximum_dose_Gy, maximum_position, spectrum_d
     
     E_MeV_u_input, particle_no_input, fluence_cm2_input = spectrum_at_maximum
     
-    old_input_dose_Gy = src.pyamtrack.AT_total_D_Gy(len(E_MeV_u_input), E_MeV_u_input, particle_no_input, fluence_cm2_input, material_no, stopping_power_source_no)
+    old_input_dose_Gy = libAT.AT_total_D_Gy(len(E_MeV_u_input), E_MeV_u_input, particle_no_input, fluence_cm2_input, material_no, stopping_power_source_no)
     
     factor = maximum_dose_Gy / old_input_dose_Gy
     
@@ -142,12 +142,12 @@ def spectrum_at_depth(depth_g_cm2, spectrum):
     else:
         depth_ind = bisect.bisect_left(sorted(spectrum.keys()),depth_g_cm2)
         depth_next = sorted(spectrum.keys())[depth_ind]
-	ratio = 1
-	if depth_ind > 0:
-	        depth_prev = sorted(spectrum.keys())[depth_ind-1]
-	        ratio = (depth_g_cm2-depth_prev)/(depth_next-depth_prev)
-	else:
-	        depth_prev = sorted(spectrum.keys())[0]
+        ratio = 1
+        if depth_ind > 0:
+            depth_prev = sorted(spectrum.keys())[depth_ind-1]
+            ratio = (depth_g_cm2-depth_prev)/(depth_next-depth_prev)
+        else:
+            depth_prev = sorted(spectrum.keys())[0]
         E_MeV_u, particle_no, fluence_cm2_prev = spectrum[depth_prev]
         fluence_cm2_next = spectrum[depth_next][2]
         fluence_cm2 = [0] * len(fluence_cm2_next)
@@ -172,7 +172,7 @@ def dose_at_depth(depth_g_cm2, local_max, maximum, spectrum):
     particle_no_OK = [particle_no[i] for i in non_zero_fluence_indexes]
     fluence_cm2_OK = [fluence_cm2[i] for i in non_zero_fluence_indexes]
     
-    dose_Gy = src.pyamtrack.AT_total_D_Gy(len(E_MeV_u_OK), E_MeV_u_OK, particle_no_OK, fluence_cm2_OK, material_no, stopping_power_source_no)
+    dose_Gy = libAT.AT_total_D_Gy(len(E_MeV_u_OK), E_MeV_u_OK, particle_no_OK, fluence_cm2_OK, material_no, stopping_power_source_no)
 
     return dose_Gy
 
@@ -195,10 +195,10 @@ def fluence_at_depth(depth_g_cm2, local_max, maximum, spectrum):
     particle_no_uniq = set(particle_no_OK)
 
     for p in particle_no_uniq:
-	    res_fluence_cm2[p] = 0
+            res_fluence_cm2[p] = 0
 
     for i in range(len(fluence_cm2_OK)):
-	res_fluence_cm2[particle_no_OK[i]] += fluence_cm2_OK[i]
+        res_fluence_cm2[particle_no_OK[i]] += fluence_cm2_OK[i]
 
     return res_fluence_cm2
     
@@ -219,7 +219,7 @@ def survival(E_MeV_u, particle_no, fluence_cm2,  m_number_of_targets, D0_charact
     use_approximation = True
     stopping_power_source_no = 0
     survival_v = 0.
-    code, survival = src.pyamtrack.AT_KatzModel_mixed_field_survival ( number_of_items, 
+    code, survival = libAT.AT_KatzModel_mixed_field_survival ( number_of_items,
                                                                fluence_cm2_OK, 
                                                                E_MeV_u_OK, 
                                                                particle_no_OK, 

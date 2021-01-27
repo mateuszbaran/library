@@ -1,11 +1,13 @@
-import common
-import generation_library
+#import common
+#import generation_library
 import logging
-import ConfigParser
+import configparser
 import pylab
 from os import listdir, getcwd, mkdir
 import datetime
 import math
+
+from . import common
 
 
 def read_config(filename):
@@ -22,7 +24,7 @@ def read_config(filename):
         exit(1)
 
     #logging.info('Parsing config file \'' + filename + '\'...')
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.read(filename)
 
     list_of_name_value_pairs = []

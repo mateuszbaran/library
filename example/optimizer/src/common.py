@@ -36,7 +36,7 @@ def parse_command_line_arguments(parser):
 
     # show version if asked to
     if args_dictionary['version'] == True:
-        print 'Script version:', version
+        print('Script version:', version)
         exit(0)
 
     return args_dictionary

@@ -5,7 +5,7 @@ import src.common as common
 import src.generation_library as generation_library 
 import src.in_out as in_out
 import src.plotting as plotting
-import src.pyamtrack
+import pyamtrack
 import src.pyamtrack_SPC
 
 from src.in_out import *
@@ -33,7 +33,7 @@ def printInitSpectrum(positions, coefficients, maximum, distal):
             normalisation = 1.
             steps_no = 1
     
-            result = src.pyamtrack.AT_SPC_read_header_from_filename_fast(dirname + filename, E_MeV_u, peak_position_g_cm2, particle_no, material_no, normalisation, steps_no)
+            result = pyamtrack.AT_SPC_read_header_from_filename_fast(dirname + filename, E_MeV_u, peak_position_g_cm2, particle_no, material_no, normalisation, steps_no)
             E_v.append( result[1] )
             p_v.append( result[2] )
  
@@ -43,30 +43,30 @@ def printInitSpectrum(positions, coefficients, maximum, distal):
     p_v = p_v[0:-1]
 
     # read spectrum corresponding to maximum distal BP    
-    spectrum_full = src.pyamtrack_SPC.extract_spectrum_at_range(dirname, distal)
+    spectrum_full = pyamtrack_SPC.extract_spectrum_at_range(dirname, distal)
     spectrum = spectrum_full
-    spectrum_dict = src.pyamtrack_SPC.get_spectrum_dictionary_depth(spectrum)
+    spectrum_dict = pyamtrack_SPC.get_spectrum_dictionary_depth(spectrum)
     
     # rescale to maximum dose of single BP = 1
     maximum_dose_Gy = 1.
-    scaled_spectrum_dict = src.pyamtrack_SPC.scale_fluence_to_maximum_dose( maximum_dose_Gy, maximum, spectrum_dict)
+    scaled_spectrum_dict = pyamtrack_SPC.scale_fluence_to_maximum_dose( maximum_dose_Gy, maximum, spectrum_dict)
     
     #input SOBP dose
-    input_dose_cm2 = sum([coefficients[i] * src.pyamtrack_SPC.dose_at_depth(0, maximum, positions[i], scaled_spectrum_dict) for i in range(len(coefficients)) ])
+    input_dose_cm2 = sum([coefficients[i] * pyamtrack_SPC.dose_at_depth(0, maximum, positions[i], scaled_spectrum_dict) for i in range(len(coefficients)) ])
     #print "input dose = ", input_dose_cm2
     
     #input SOBP fluence        
-    input_fluence_cm2 = sum([coefficients[i] * src.pyamtrack_SPC.fluence_at_depth(0, maximum, positions[i], scaled_spectrum_dict)[6012] for i in range(len(coefficients)) ])
+    input_fluence_cm2 = sum([coefficients[i] * pyamtrack_SPC.fluence_at_depth(0, maximum, positions[i], scaled_spectrum_dict)[6012] for i in range(len(coefficients)) ])
     #print "input fluence = ", input_fluence_cm2
     
-    components_fluence = [src.pyamtrack_SPC.fluence_at_depth(0, maximum, positions[i], scaled_spectrum_dict)[6012] for i in range(len(coefficients)) ]
-    components_dose = [src.pyamtrack_SPC.dose_at_depth(0, maximum, positions[i], scaled_spectrum_dict) for i in range(len(coefficients)) ]
+    components_fluence = [pyamtrack_SPC.fluence_at_depth(0, maximum, positions[i], scaled_spectrum_dict)[6012] for i in range(len(coefficients)) ]
+    components_dose = [pyamtrack_SPC.dose_at_depth(0, maximum, positions[i], scaled_spectrum_dict) for i in range(len(coefficients)) ]
     #print "components fluence = ", components_fluence
     #print "components dose = ", components_dose
     
     for i in range(len(positions)):
         E = np.interp( positions[i], p_v , E_v)
-        print positions[i], coefficients[i], E, coefficients[i] * components_fluence[i]
+        print(positions[i], coefficients[i], E, coefficients[i] * components_fluence[i])
 
     
     pass

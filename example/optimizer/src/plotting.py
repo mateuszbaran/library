@@ -4,12 +4,13 @@ import logging
 import argparse
 import csv
 
-import src.common as common
-import src.pyamtrack
-import src.pyamtrack_SPC
+from . import common
+from . import generation_library
+from pyamtrack import libAT
+from . import pyamtrack_SPC
 
-from src.in_out import *
-from src.generation_library import *
+from .in_out import *
+from .generation_library import *
 
 def main():
         
@@ -43,7 +44,7 @@ def main():
     failure_count += doctest.testmod(generation_library)[0]
     failure_count += doctest.testmod()[0]
     if failure_count > 0 :
-        exit(-1)
+        print("Number of failures:", failure_count)
 
     args_dict = common.parse_command_line_arguments(parser)
 
@@ -86,16 +87,16 @@ def executeParallelMap( functionName, argsT, inputV ):
     jobs = []
     start_time = time.time()
              
-    for index in xrange(parts):
-	starti = index*step
-	endi = min((index+1)*step, len(inputV))
-        jobs.append(job_server.submit(functionName, args=(tuple([inputV[starti:endi]]) + argsT), depfuncs=(), modules=("src.pyamtrack_SPC",), globals = None))
+    for index in range(parts):
+        starti = index*step
+        endi = min((index+1)*step, len(inputV))
+        jobs.append(job_server.submit(functionName, args=(tuple([inputV[starti:endi]]) + argsT), depfuncs=(), modules=("pyamtrack_SPC",), globals = None))
     
     for job in jobs:
-	outputV.extend(job())
+        outputV.extend(job())
 
-	print "Time elapsed: ", time.time() - start_time, "s"                              
-	print job_server.print_stats()        
+        print("Time elapsed: ", time.time() - start_time, "s")
+        print(job_server.print_stats())
 
     job_server.destroy()
 
@@ -116,9 +117,9 @@ def plot_Dose(filename, spectrum, maximum, base_BP_positions, coefficients, two_
     parallel = common.check_option('parallel')
 
     if parallel:
-       coefficients_p = []
-       for c in coefficients:
-       	coefficients_p.append(float(c))
+        coefficients_p = []
+        for c in coefficients:
+            coefficients_p.append(float(c))
 
     Y_SOBP = []
            
@@ -127,34 +128,32 @@ def plot_Dose(filename, spectrum, maximum, base_BP_positions, coefficients, two_
         plateau_dist = base_BP_positions[-1]
         plateau_prox = base_BP_positions[0]
 
-	def calculateYa(X_vect, maximum, base_BP_positions, spectrum, plateau_dist, plateau_prox, coefficients):
-	        from src import pyamtrack_SPC
-	        Y_vect = [sum( [coefficients[i] * (pyamtrack_SPC.dose_at_depth(x, maximum, base_BP_positions[i], spectrum) + 
+    def calculateYa(X_vect, maximum, base_BP_positions, spectrum, plateau_dist, plateau_prox, coefficients):
+        Y_vect = [sum( [coefficients[i] * (pyamtrack_SPC.dose_at_depth(x, maximum, base_BP_positions[i], spectrum) +
                                            pyamtrack_SPC.dose_at_depth(plateau_dist +  plateau_prox - x, maximum, base_BP_positions[i], spectrum))
                                           for i in range(len(coefficients)) ] ) for x in X_vect]
-		return Y_vect
+        return Y_vect
 
-    	if serial:
-		Y_SOBP = calculateYa(X_wide, maximum, base_BP_positions, spectrum, plateau_dist, plateau_prox, coefficients)
+    if serial:
+        Y_SOBP = calculateYa(X_wide, maximum, base_BP_positions, spectrum, plateau_dist, plateau_prox, coefficients)
 
-	if parallel:
-		args = (maximum, base_BP_positions, spectrum, plateau_dist, plateau_prox, coefficients_p)
-		Y_SOBP = executeParallelMap( calculateYa, args, X_wide)
+    if parallel:
+        args = (maximum, base_BP_positions, spectrum, plateau_dist, plateau_prox, coefficients_p)
+        Y_SOBP = executeParallelMap( calculateYa, args, X_wide)
 
     else:
 
-	def calculateYb(X_vect, maximum, base_BP_positions, spectrum, coefficients):
-	        from src import pyamtrack_SPC
-	        Y_vect = [sum( [coefficients[i] * pyamtrack_SPC.dose_at_depth(x, maximum, base_BP_positions[i], spectrum)
-                                          for i in range(len(coefficients)) ] ) for x in X_vect]
-		return Y_vect
+        def calculateYb(X_vect, maximum, base_BP_positions, spectrum, coefficients):
+            Y_vect = [sum( [coefficients[i] * pyamtrack_SPC.dose_at_depth(x, maximum, base_BP_positions[i], spectrum)
+                                              for i in range(len(coefficients)) ] ) for x in X_vect]
+            return Y_vect
 
-    	if serial:
-		Y_SOBP = calculateYb(X_wide, maximum, base_BP_positions, spectrum, coefficients)
+        if serial:
+            Y_SOBP = calculateYb(X_wide, maximum, base_BP_positions, spectrum, coefficients)
 
-	if parallel:
-		args = (maximum, base_BP_positions, spectrum, coefficients_p)
-		Y_SOBP = executeParallelMap( calculateYb, args, X_wide)
+        if parallel:
+                    args = (maximum, base_BP_positions, spectrum, coefficients_p)
+                    Y_SOBP = executeParallelMap( calculateYb, args, X_wide)
 
     # plot line at 1
     pylab.axhline(1, color = 'g')
@@ -163,14 +162,13 @@ def plot_Dose(filename, spectrum, maximum, base_BP_positions, coefficients, two_
 
     listPartPeaksY = []
     for i in range(len(coefficients)):
-	def calculateYc(X_vect, coefficient, maximum, base_BP_position, spectrum):
-	        from src import pyamtrack_SPC
-		return [coefficient * pyamtrack_SPC.dose_at_depth(x, maximum, base_BP_position, spectrum) for x in X_vect]
-	if serial:
-		Yi = calculateYc(X_wide, coefficients[i], maximum, base_BP_positions[i], spectrum)
-	if parallel:
-		args = (coefficients_p[i], maximum, base_BP_positions[i], spectrum)
-		Yi = executeParallelMap( calculateYc, args, X_wide)
+        def calculateYc(X_vect, coefficient, maximum, base_BP_position, spectrum):
+                return [coefficient * pyamtrack_SPC.dose_at_depth(x, maximum, base_BP_position, spectrum) for x in X_vect]
+        if serial:
+                Yi = calculateYc(X_wide, coefficients[i], maximum, base_BP_positions[i], spectrum)
+        if parallel:
+                args = (coefficients_p[i], maximum, base_BP_positions[i], spectrum)
+                Yi = executeParallelMap( calculateYc, args, X_wide)
 
         listPartPeaksY.append(Yi)
         pylab.plot(X_wide, Yi, color = 'g', label = 'BP nr ' + str(i))
@@ -254,11 +252,11 @@ def plot_Survival(filename, scaling_factor, spectrum, maximum, base_BP_positions
        Y_wide = calculateY( X_wide, coefficients, maximum, base_BP_positions, spectrum, scaling_factor, two_beams, m, D0, sigma, kappa, er_model)
 
     if parallel:
-	coefficients_p = []
-	for c in coefficients:
-      		coefficients_p.append(float(c))
-	args = (coefficients_p, maximum, base_BP_positions, spectrum, scaling_factor, two_beams, m, D0, sigma, kappa, er_model)
-	Y_wide = executeParallelMap( calculateY, args, X_wide)
+        coefficients_p = []
+        for c in coefficients:
+                      coefficients_p.append(float(c))
+        args = (coefficients_p, maximum, base_BP_positions, spectrum, scaling_factor, two_beams, m, D0, sigma, kappa, er_model)
+        Y_wide = executeParallelMap( calculateY, args, X_wide)
 
     # plot line at 1
     pylab.axhline(1, color = 'g')
